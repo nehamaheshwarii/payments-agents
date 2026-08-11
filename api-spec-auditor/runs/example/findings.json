@@ -1,0 +1,66 @@
+[
+  {
+    "endpoint": "POST /payments",
+    "category": "ambiguous_field",
+    "severity": "high",
+    "finding": "The `status` enum on the returned Payment (pending, processing, succeeded, failed, requires_action) has no per-value documentation.",
+    "impact": "An integrator can't tell which states are terminal, which require polling, or what `requires_action` means without contacting support — this is the single most common first-integration question for a payments API.",
+    "suggested_fix": "Document each status value: whether it's terminal, what causes the transition, and — for `requires_action` — what the integrator's client is expected to do next."
+  },
+  {
+    "endpoint": "POST /payments",
+    "category": "missing_error_semantics",
+    "severity": "high",
+    "finding": "The 402 and 409 responses have no body schema and no description of cause or recovery.",
+    "impact": "A first-time integrator can't distinguish a declined payment (402, retry with new payment method) from a duplicate/conflicting request (409, safe to retry as-is) without triggering both in a sandbox and guessing from the status code alone.",
+    "suggested_fix": "Add a response schema (e.g. an error object with a machine-readable `code`) and describe what causes each status and what the client should do next."
+  },
+  {
+    "endpoint": "POST /payments",
+    "category": "ambiguous_field",
+    "severity": "medium",
+    "finding": "`idempotency_key` is optional with no description of what happens if it's omitted or reused.",
+    "impact": "Without documented behavior, an integrator won't know whether omitting it risks duplicate charges on retry, or whether reusing a key returns the original result or a conflict — leading to double-charge incidents.",
+    "suggested_fix": "Document the retry contract explicitly: what happens on omission, and what happens when a previously-used key is replayed with the same vs. different body."
+  },
+  {
+    "endpoint": "POST /payments",
+    "category": "ambiguous_field",
+    "severity": "medium",
+    "finding": "`expires_at` is returned with no explanation of what expires or what happens after that time.",
+    "impact": "An integrator has to guess whether the payment attempt becomes unpayable, the authorization is released, or only client-side action (like a hosted payment page) times out — and builds handling for the wrong case.",
+    "suggested_fix": "Document what `expires_at` governs and the resulting state transition (e.g. does `status` move to `failed` automatically, or does it require a follow-up call?)."
+  },
+  {
+    "endpoint": "POST /payments",
+    "category": "breaking_change_risk",
+    "severity": "low",
+    "finding": "`metadata` is an untyped free-form object (`additionalProperties: true`) with no size or key constraints.",
+    "impact": "Without documented limits, integrators store arbitrary data there; tightening it later (size caps, reserved keys, type constraints) becomes a breaking change once real usage exists.",
+    "suggested_fix": "Document key/value size limits and reserved key namespaces now, before partners start relying on unconstrained metadata."
+  },
+  {
+    "endpoint": "GET /payments/{id}",
+    "category": "missing_error_semantics",
+    "severity": "low",
+    "finding": "The 404 response has no body schema and doesn't distinguish 'payment does not exist' from 'exists but not accessible to this caller'.",
+    "impact": "An integrator debugging a 404 during testing can't tell whether they made a typo, used the wrong environment's ID, or hit an authorization issue.",
+    "suggested_fix": "Add an error body with a machine-readable code, and consider whether authorization failures should be distinguished from not-found."
+  },
+  {
+    "endpoint": "flow: Create payment -> poll for status -> handle requires_action",
+    "category": "integration_blind_spot",
+    "severity": "high",
+    "finding": "After creating a payment that returns `status: requires_action`, the spec gives no mechanism for what action is required or how the client learns when it's resolved.",
+    "impact": "A first-time integrator gets a payment stuck in `requires_action` with no field pointing to a redirect URL, client secret, or next step, and no indication of whether to poll GET /payments/{id} or wait for a webhook — this is exactly the kind of gap that turns into a support ticket during a partner's first integration attempt.",
+    "suggested_fix": "Either document a polling contract (recommended interval, timeout) or add a field describing the required client action and how completion is signaled, and state it explicitly in the endpoint description."
+  },
+  {
+    "endpoint": "flow: Create payment -> handle 402 decline",
+    "category": "integration_blind_spot",
+    "severity": "medium",
+    "finding": "On a 402 response there's no guidance on whether it's safe to retry the same request, whether the `idempotency_key` (if any) is now 'used up', or whether a new payment must be created.",
+    "impact": "Integrators either retry blindly (risking a duplicate charge if the key semantics are wrong) or abandon the idempotency key entirely, defeating its purpose.",
+    "suggested_fix": "State explicitly, next to the 402 response, what the caller should do: retry with a new idempotency key and payment method, or something else."
+  }
+]

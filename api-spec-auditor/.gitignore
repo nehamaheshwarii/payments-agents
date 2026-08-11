@@ -1,0 +1,43 @@
+# Environment
+.env
+venv/
+env/
+.venv/
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checkers / linters
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Audit runs (spec content + analysis output) — keep one committed example
+runs/*
+!runs/example/
+!runs/example/**
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,10 @@
+{
+  "spec_source": "runs/example/spec.yaml (bundled sample spec, committed for demo purposes)",
+  "created_at": "2026-08-11T02:29:18.123036+00:00",
+  "endpoint_count": 2,
+  "requests": [
+    "requests/endpoint_analysis_01.md",
+    "requests/consumer_simulation.md"
+  ],
+  "output": "findings.json"
+}

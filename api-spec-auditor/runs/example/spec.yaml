@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Sample Payments API
+  version: "1.0"
+  description: A minimal payments API used to demonstrate the API Spec Auditor.
+paths:
+  /payments:
+    post:
+      summary: Create a payment
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, currency, merchant_id]
+              properties:
+                amount:
+                  type: integer
+                  description: Amount in the smallest currency unit.
+                currency:
+                  type: string
+                  example: usd
+                merchant_id:
+                  type: string
+                idempotency_key:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "201":
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "402":
+          description: Payment failed
+        "409":
+          description: Conflict
+  /payments/{id}:
+    get:
+      summary: Retrieve a payment
+      operationId: getPayment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Not found
+components:
+  schemas:
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, succeeded, failed, requires_action]
+        merchant_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
