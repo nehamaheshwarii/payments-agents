@@ -2,7 +2,7 @@
 
 **Catch the ambiguities in your OpenAPI spec before your partners find them in production.**
 
-<!-- TODO: replace with a GIF of the tool running -->
+
 ![screenshot](docs/demo.png)
 
 ---
